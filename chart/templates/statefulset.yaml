@@ -27,8 +27,9 @@ spec:
   replicas: {{ .Values.controlPlane.statefulSet.highAvailability.replicas }}
   template:
     metadata:
-      {{- if .Values.controlPlane.statefulSet.pods.annotations }}
       annotations:
+       vClusterConfigHash: {{ .Values | toYaml | b64enc | sha256sum | quote }}
+      {{- if .Values.controlPlane.statefulSet.pods.annotations }}
 {{ toYaml .Values.controlPlane.statefulSet.pods.annotations | indent 8 }}
       {{- end }}
       labels:
@@ -122,11 +123,9 @@ spec:
           command:
 {{ toYaml .Values.controlPlane.statefulSet.command | indent 12 }}
           {{- end }}
-          args:
           {{- if .Values.controlPlane.statefulSet.args }}
+          args:
 {{ toYaml .Values.controlPlane.statefulSet.args | indent 12 }}
-          {{- else }}
-            - --config=/var/vcluster/config.yaml
           {{- end }}
           {{- if .Values.controlPlane.statefulSet.probes.livenessProbe.enabled }}
           livenessProbe:
